@@ -1,7 +1,7 @@
 <?php
    $con=mysqli_connect("localhost", "root", "000000", "aptinfo") or die("MySQL 접속 실패");
 
-   $sql = "SELECT * FROM aptinfo";
+   $sql = "SELECT * FROM aptinfo;";
  
    $ret = mysqli_query($con, $sql);
  
@@ -11,29 +11,6 @@
    while($row = mysqli_fetch_array($ret)){
        array_push($arr, [(double)$row['lat'], (double)$row['lng'] ,$row['aptname']]);
     
-}
-
-//search
-function print_result(){
-    if(isset($_POST['addr']) && $_POST['addr'] != NULL){
-        $addrs = $_POST['addr'];
-
-        $conn = mysqli_connect('localhost', 'root', '000000', 'aptinfo');
-        $sql = "SELECT * FROM aptinfo where aptname like '%$addrs%';";
-        $result = mysqli_query($conn, $sql);
-        
-        if(mysqli_num_rows($result) > 0){
-            while($row = mysqli_fetch_array($result)){
-                echo "<tr><td>".$row['aptname']."</td><td>".$row['gu'].$row['dong']."</td></tr>";
-                echo "<br />";
-            }
-        } else{
-            echo "<script>alert('주소 없음.')</script>";
-        }
-        mysqli_close($conn);
-    } else{
-        echo "검색해주세요.";
-    }
 }
 
 //echo var_dump($arr);
@@ -87,6 +64,32 @@ mysqli_close($con);
                     </thead>
                     <tbody>
                       <tr>
+
+                      <?php
+                if(isset($_POST['addr']) && $_POST['addr'] != NULL){
+                    $addrs = $_POST['addr'];
+            
+                    $conn = mysqli_connect('localhost', 'root', '000000', 'aptinfo');
+                    $sql = "SELECT * FROM aptinfo where aptname like '%$addrs%' limit 10;";
+                    $result = mysqli_query($conn, $sql);
+                    
+                    if(mysqli_num_rows($result) > 0){
+                        while($row = mysqli_fetch_array($result)){
+                            echo
+                            '<tr>'.
+                            '<td>'.$row['aptname'].'</td>'
+                            .'<td>'.$row['gu']." ".$row['dong'].'</td>'
+                            .'</tr>'
+                            ;
+                        }
+                    } else{
+                        echo "<script>alert('주소 없음.')</script>";
+                    }
+                } else{
+                    echo "검색해주세요.";
+                }
+            ?>
+
                       </tr>
                     </tbody>
                   </table>
@@ -101,9 +104,7 @@ mysqli_close($con);
         </div>
         <div id = search_result>
             <hr>
-            <?php
-                print_result();
-            ?>
+            
         </div>
     </div>
             

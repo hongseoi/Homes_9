@@ -1,0 +1,115 @@
+<?php
+   $con=mysqli_connect("localhost", "root", "000000", "aptinfo") or die("MySQL 접속 실패");
+
+   $sql = "SELECT * FROM aptinfo";
+ 
+   $ret = mysqli_query($con, $sql);
+ 
+ 
+   $arr = array();
+ 
+   while($row = mysqli_fetch_array($ret)){
+       array_push($arr, [(double)$row['y'], (double)$row['x'] ,$row['aptname']]);
+    
+}
+
+//echo var_dump($arr);
+mysqli_close($con);
+
+?>
+
+<html>
+    <head>
+        <link rel='stylesheet' href='map.css'>
+    </head>
+    <body>
+    <p style="margin-top:-12px">
+     사용한 데이터를 보시려면
+    <em class="link">
+       <a href="/download/web/data/chicken.json" target="_blank">여기를 클릭하세요!</a>
+    </em>
+</p>
+    <div class="ex-layout">
+	<div class="gnb">
+    <h1 class="m-0 display-5"><span class="text-primary">A</span>partner</h1>
+        <p>아빠엄마를 위한 최고의 집 추천 서비스</p>
+    </div>
+	<div class="main">
+		<div class="lnb">Left menu</div>
+		<div class="content">
+			Content area
+            <div id="map">
+            
+		</div>
+	</div>
+	<div class="footer">
+		Footer area
+	</div>
+</div>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8877863071d042c1df8b61517275dbbf&libraries=clusterer"></script>
+        <script type="text/javascript"> 
+        window.onload = function() { 
+             // 지도의 중심            
+            var position = new daum.maps.LatLng(37.5737049, 126.9888481);
+            var map = new daum.maps.Map(document.getElementById('map'), { 
+                center: position,
+                level: 9,
+                mapTypeId: daum.maps.MapTypeId.ROADMAP });
+            var zoomControl = new daum.maps.ZoomControl();
+            map.addControl(zoomControl, daum.maps.ControlPosition.RIGHT);
+            var mapTypeControl = new daum.maps.MapTypeControl();
+            map.addControl(mapTypeControl, daum.maps.ControlPosition.TOPRIGHT); // 다중 마커와 인포윈도우 표시
+            var locations = <?php echo json_encode($arr); ?>;
+            for(i = 0; i < locations.length; i++) {
+                var marker = new daum.maps.Marker({ 
+                    position: new daum.maps.LatLng(locations[i][0], locations[i][1])
+                 });
+                marker.setMap(map);
+                daum.maps.event.addListener(marker, 'click', (function(marker, i) { 
+                    return function() { 
+                        var infowindow = new daum.maps.InfoWindow({
+                            content: '<p style="margin:7px 22px 7px 12px;font:12px/1.5 sans-serif">' + locations[i][2] + '</p>',
+                            removable : true
+                            });
+                            infowindow.open(map, marker);
+                             } 
+                             })(marker, i));
+                            } }; 
+        //클러스터 코드
+        var clusterer = new kakao.maps.MarkerClusterer({
+        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+        averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+        minLevel: 3, // 클러스터 할 최소 지도 레벨
+        disableClickZoom: true // 클러스터 마커를 클릭했을 때 지도가 확대되지 않도록 설정한다
+    });
+
+    $.get("aptlocation.json", function(data) {
+        // 데이터에서 좌표 값을 가지고 마커를 표시합니다
+        // 마커 클러스터러로 관리할 마커 객체는 생성할 때 지도 객체를 설정하지 않습니다
+        var markers = $(data.positions).map(function(i, position) {
+            return new kakao.maps.Marker({
+                position : new kakao.maps.LatLng(position.y, position.x)
+            });
+        });
+
+        // 클러스터러에 마커들을 추가합니다
+        clusterer.addMarkers(markers);
+    });
+
+    // 마커 클러스터러에 클릭이벤트를 등록합니다
+    // 마커 클러스터러를 생성할 때 disableClickZoom을 true로 설정하지 않은 경우
+    // 이벤트 헨들러로 cluster 객체가 넘어오지 않을 수도 있습니다
+    kakao.maps.event.addListener(clusterer, 'clusterclick', function(cluster) {
+
+        // 현재 지도 레벨에서 1레벨 확대한 레벨
+        var level = map.getLevel()-1;
+
+        // 지도를 클릭된 클러스터의 마커의 위치를 기준으로 확대합니다
+        map.setLevel(level, {anchor: cluster.getCenter()});
+    });
+
+   
+        </script>
+    </body>
+</html>

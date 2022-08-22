@@ -1,0 +1,35 @@
+.ex-layout{
+	width: 100%;
+}
+.ex-layout .gnb{
+	padding: 15px;
+	background-image: url(../infinite-loop-03.jpg);
+}
+.ex-layout .main{
+	background-color: white;
+}
+.ex-layout .main:after{ clear: both; display: block; content: '' }
+
+.ex-layout .main .lnb{
+	float: left;
+	width: 30%;
+	height: 60%;
+	background-color: orange;
+}
+.ex-layout .main .content{
+	float: left;
+	width: 70%;
+}
+.ex-layout .footer{
+	padding: 15px;
+	background-color: #ddd;
+}
+html { height: 100% } 
+body { height: 100%; margin: 0; padding: 0 }
+#map { width: 90%; height: 80%; border : solid blue ; margin-left:auto; margin-right:auto } 
+
+.text-primary {
+    color: #0BCEAF !important;
+  }
+
+  
